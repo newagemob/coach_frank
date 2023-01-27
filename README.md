@@ -1,1 +1,2 @@
-# coach_frank
+# Coach Frank
+***an AI skateboarding coach***
