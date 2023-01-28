@@ -16,46 +16,43 @@ inputs = gr.components.Video(
 outputs = gr.outputs.Textbox(label='Coach Frank says:')
 
 
-def predict(frame):
+def predict(video_path):
     # frame is a string representing the videos location in /tmp directory. the video is in mp4 format
-    video = cv2.VideoCapture(frame)  # open the video
+    video = cv2.VideoCapture(video_path) # open the video
+    # read the first frame
+    success, frame = video.read()
     
-    # get the number of frames in the video
-    num_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
-    sample_every_frame = max(1, num_frames // SEQUENCE_LENGTH)
-    current_frame = 0
-    max_images = SEQUENCE_LENGTH
+    # convert the frame to grayscale
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-    while True:
-        success, frame = video.read()
-        if not success:
-            break
-
-        if current_frame % sample_every_frame == 0:
-            # OPENCV reads in BGR, tensorflow expects RGB so we invert the order
-            frame = frame[:, :, ::-1]
-            # shape data to match model [None, 40, 2048]
-            img = tf.reshape(frame, (-1, 3))
-            img = tf.image.resize(img, (SEQUENCE_LENGTH, 2048))
-            img = tf.keras.applications.inception_v3.preprocess_input(img)
-            max_images -= 1
-        yield img, frame
-        current_frame += 1
-
-        if max_images == 0:
-            break
+    # resize the frame to the input shape of the model
+    gray = cv2.resize(gray, (2048, SEQUENCE_LENGTH))
     
-    # get the prediction of the current video
-    prediction = model.predict(img)
-    print(f'👉 Prediction: {prediction}')
+    # normalize the pixel values
+    gray = gray / 255
     
+    # add an extra dimension to the frame for the model
+    gray = np.expand_dims(gray, axis=0)
+    
+    # predict the trick using the model
+    prediction = model.predict(gray)
+
     # get the index of the highest probability
     index = np.argmax(prediction)
     
-    # return the label of the highest probability
-    # return labels[index]
-  
+    label_percentage = prediction[0][index]
 
+    # get the label of the predicted trick
+    label = labels[index]
+
+    # print the predicted trick
+    print("Predicted trick: " + label)
+    print("Confidence: " + str(label_percentage))
+
+    # return the predicted trick
+    return label
+    
+    
 iface = gr.Interface(fn=predict, inputs=inputs, outputs=outputs,
                      capture_session=True, live=True, allow_flagging=False)
 
