@@ -6,7 +6,7 @@ from tensorflow.keras.models import load_model
 SEQUENCE_LENGTH = 40
 
 # Load the pre-trained model
-model = load_model('trained_model.h5')
+model = load_model('trick_classifier.h5')
 
 # Initialize webcam using OpenCV
 cap = cv2.VideoCapture(0)

@@ -30,8 +30,7 @@ def frame_generator():
                 # OPENCV reads in BGR, tensorflow expects RGB so we invert the order
               frame = frame[:, :, ::-1]
               img = tf.image.resize(frame, (299, 299))
-              img = tf.keras.applications.inception_v3.preprocess_input(
-                  img)
+              img = tf.keras.applications.inception_v3.preprocess_input(img)
               max_images -= 1
             yield img, video_path
 
