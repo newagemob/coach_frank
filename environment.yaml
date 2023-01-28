@@ -1,0 +1,11 @@
+# conda environment
+name: skateboard-ai
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - pip
+  - pip:
+    - tensorflow==2.11
+    - opencv-python
